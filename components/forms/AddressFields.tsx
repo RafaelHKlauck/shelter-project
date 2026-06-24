@@ -11,7 +11,7 @@ import { fetchCep, formatZip } from "@/lib/validation/zip";
 export type AddressValues = {
   address_zip: string;
   address_line: string;
-  address_number?: string;
+  address_number?: string | null;
   address_city: string;
   address_state: string;
 };

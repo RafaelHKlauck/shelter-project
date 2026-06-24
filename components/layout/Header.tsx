@@ -9,7 +9,10 @@ import {
   User,
   MessageSquare,
   LayoutDashboard,
+  LogIn,
+  LogOut,
 } from "lucide-react";
+import { signOutAction } from "@/app/(app)/actions";
 
 type NavItem = {
   href: string;
@@ -18,22 +21,43 @@ type NavItem = {
   exact?: boolean;
 };
 
-const NAV_ITEMS: readonly NavItem[] = [
+const PUBLIC_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Início", icon: Home, exact: true },
   { href: "/animals", label: "Animais", icon: PawPrint },
   { href: "/shelters", label: "Abrigos", icon: Building2 },
+];
+
+const AUTH_ITEMS: readonly NavItem[] = [
   { href: "/messages", label: "Mensagens", icon: MessageSquare },
-  { href: "/shelter-dashboard", label: "Painel", icon: LayoutDashboard },
   { href: "/profile", label: "Perfil", icon: User },
 ];
 
-export function Header() {
+const SHELTER_ITEM: NavItem = {
+  href: "/shelter-dashboard",
+  label: "Painel",
+  icon: LayoutDashboard,
+};
+
+export function Header({
+  isLoggedIn,
+  isShelterMember,
+}: {
+  isLoggedIn: boolean;
+  isShelterMember: boolean;
+}) {
   const pathname = usePathname();
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) return pathname === href;
     return pathname === href || pathname.startsWith(href + "/");
   };
+
+  const items: NavItem[] = [...PUBLIC_ITEMS];
+  if (isLoggedIn) {
+    items.push(AUTH_ITEMS[0]); // Mensagens
+    if (isShelterMember) items.push(SHELTER_ITEM);
+    items.push(AUTH_ITEMS[1]); // Perfil
+  }
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -44,8 +68,8 @@ export function Header() {
             <span className="text-xl font-bold text-gray-900">AdotaPet</span>
           </Link>
 
-          <nav className="flex gap-1">
-            {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+          <nav className="flex items-center gap-1">
+            {items.map(({ href, label, icon: Icon, exact }) => {
               const active = isActive(href, exact);
               return (
                 <Link
@@ -62,6 +86,27 @@ export function Header() {
                 </Link>
               );
             })}
+
+            {isLoggedIn ? (
+              <form action={signOutAction}>
+                <button
+                  type="submit"
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                  aria-label="Sair"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Sair</span>
+                </button>
+              </form>
+            ) : (
+              <Link
+                href="/login"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors ml-2"
+              >
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Entrar</span>
+              </Link>
+            )}
           </nav>
         </div>
       </div>

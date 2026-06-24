@@ -8,6 +8,8 @@ import { z } from "zod/v3";
 import { toast } from "sonner";
 import { signupAction } from "./actions";
 
+type Intent = "default" | "shelter";
+
 const schema = z
   .object({
     email: z.string().email("E-mail inválido"),
@@ -21,7 +23,7 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>;
 
-export function SignupForm() {
+export function SignupForm({ intent = "default" }: { intent?: Intent }) {
   const [pending, startTransition] = useTransition();
   const [needsConfirm, setNeedsConfirm] = useState(false);
   const {
@@ -35,6 +37,7 @@ export function SignupForm() {
       const result = await signupAction({
         email: values.email,
         password: values.password,
+        intent,
       });
       if (result?.error) toast.error(result.error);
       else if (result?.needsConfirm) setNeedsConfirm(true);
@@ -61,9 +64,13 @@ export function SignupForm() {
       className="w-full max-w-md bg-white rounded-xl border border-gray-200 p-8 space-y-5"
     >
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Criar conta</h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {intent === "shelter" ? "Cadastrar meu abrigo" : "Criar conta"}
+        </h1>
         <p className="text-gray-600 mt-1">
-          Cadastre-se e encontre seu novo melhor amigo.
+          {intent === "shelter"
+            ? "Primeiro crie sua conta de administrador. Em seguida pediremos os dados do seu abrigo."
+            : "Cadastre-se e encontre seu novo melhor amigo."}
         </p>
       </div>
 

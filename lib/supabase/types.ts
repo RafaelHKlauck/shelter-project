@@ -528,7 +528,42 @@ export type Database = {
     }
     Views: { [_ in never]: never }
     Functions: {
+      animals_feed: {
+        Args: {
+          p_max_km?: number
+          p_search?: string
+          p_size?: string
+          p_species?: string
+        }
+        Returns: {
+          breed: string
+          cover_url: string
+          distance_km: number
+          estimated_age_months: number
+          id: string
+          name: string
+          neutered: boolean
+          shelter_id: string
+          shelter_name: string
+          size: Database["public"]["Enums"]["animal_size"]
+          species: Database["public"]["Enums"]["animal_species"]
+        }[]
+      }
       f_distance_km: { Args: { a: unknown; b: unknown }; Returns: number }
+      get_requester_history: {
+        Args: { p_exclude_shelter_id?: string; p_requester_id: string }
+        Returns: {
+          animal_name: string
+          created_at: string
+          decided_at: string
+          finalized_at: string
+          kind: Database["public"]["Enums"]["request_kind"]
+          request_id: string
+          shelter_id: string
+          shelter_name: string
+          status: Database["public"]["Enums"]["request_status"]
+        }[]
+      }
       is_member: {
         Args: {
           p_roles: Database["public"]["Enums"]["shelter_role"][]
@@ -540,6 +575,18 @@ export type Database = {
       shelter_has_request_from: {
         Args: { p_shelter: string; p_user: string }
         Returns: boolean
+      }
+      shelters_feed: {
+        Args: { p_max_km?: number; p_search?: string }
+        Returns: {
+          animals_count: number
+          cover_url: string
+          description: string
+          distance_km: number
+          id: string
+          name: string
+          needs_supplies: boolean
+        }[]
       }
       unread_count: {
         Args: { p_conv: string; p_role: string }

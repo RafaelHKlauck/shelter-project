@@ -90,6 +90,19 @@ export function LoginForm() {
           Criar conta
         </Link>
       </p>
+
+      <div className="-mx-8 -mb-8 mt-2 px-8 py-5 bg-blue-50 border-t border-blue-100 rounded-b-xl">
+        <p className="text-sm text-gray-700">
+          <strong className="text-blue-900">É um abrigo?</strong> Crie uma conta
+          e cadastre seu abrigo para receber adoções, voluntários e doações.
+        </p>
+        <Link
+          href="/signup?next=shelter"
+          className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-blue-700 hover:underline"
+        >
+          Cadastrar meu abrigo →
+        </Link>
+      </div>
     </form>
   );
 }

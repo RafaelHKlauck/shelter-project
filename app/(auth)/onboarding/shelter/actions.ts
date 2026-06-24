@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod/v3";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/server";
-import { geocode, toWktPoint } from "@/lib/geo/geocode";
+import { geocodeAddress, toWktPoint } from "@/lib/geo/geocode";
 import { onlyDigits } from "@/lib/validation/cpf";
 
 const schema = z.object({
@@ -42,20 +42,12 @@ export async function onboardShelterAction(
   const user = await requireUser();
   const supabase = await createClient();
 
-  const fullAddress = [
-    parsed.data.address_line,
-    parsed.data.address_city,
-    parsed.data.address_state,
-    "Brazil",
-  ].join(", ");
-  const geo = await geocode(fullAddress);
-
-  if (!geo) {
-    return {
-      error:
-        "Não foi possível localizar o endereço. Verifique e tente novamente.",
-    };
-  }
+  const geo = await geocodeAddress({
+    line: parsed.data.address_line,
+    city: parsed.data.address_city,
+    state: parsed.data.address_state,
+    zip: parsed.data.address_zip,
+  });
 
   const baseSlug = slugify(parsed.data.name);
   const slug = `${baseSlug}-${crypto.randomUUID().slice(0, 6)}`;
@@ -70,7 +62,7 @@ export async function onboardShelterAction(
     address_city: parsed.data.address_city,
     address_state: parsed.data.address_state.toUpperCase(),
     address_zip: onlyDigits(parsed.data.address_zip).padStart(8, "0"),
-    location: toWktPoint(geo) as unknown as never,
+    location: geo ? (toWktPoint(geo) as unknown as never) : null,
     needs_supplies: parsed.data.needs_supplies ?? false,
     created_by: user.id,
   });

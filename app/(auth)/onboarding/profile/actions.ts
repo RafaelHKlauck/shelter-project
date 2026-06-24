@@ -1,11 +1,12 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod/v3";
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/server";
-import { hashCPF, isValidCPF, onlyDigits } from "@/lib/validation/cpf";
-import { geocode, toWktPoint } from "@/lib/geo/geocode";
+import { formatCPF, hashCPF, isValidCPF, onlyDigits } from "@/lib/validation/cpf";
+import { geocodeAddress, toWktPoint } from "@/lib/geo/geocode";
 
 const schema = z.object({
   full_name: z.string().min(2),
@@ -33,23 +34,21 @@ export async function onboardProfileAction(
   const supabase = await createClient();
 
   const cpfHash = await hashCPF(parsed.data.cpf);
+  const cpfFormatted = formatCPF(parsed.data.cpf);
 
-  const fullAddress = [
-    parsed.data.address_line,
-    parsed.data.address_number,
-    parsed.data.address_city,
-    parsed.data.address_state,
-    "Brazil",
-  ]
-    .filter(Boolean)
-    .join(", ");
-
-  const geo = await geocode(fullAddress);
+  const geo = await geocodeAddress({
+    line: parsed.data.address_line,
+    number: parsed.data.address_number ?? null,
+    city: parsed.data.address_city,
+    state: parsed.data.address_state,
+    zip: parsed.data.address_zip,
+  });
 
   const { error } = await supabase.from("profiles").insert({
     id: user.id,
     full_name: parsed.data.full_name,
     cpf_hash: cpfHash,
+    cpf_encrypted: cpfFormatted,
     birth_date: parsed.data.birth_date,
     housing_type: parsed.data.housing_type,
     address_line: parsed.data.address_line,
@@ -65,6 +64,15 @@ export async function onboardProfileAction(
       return { error: "Este CPF já está cadastrado em outra conta." };
     }
     return { error: error.message };
+  }
+
+  // Se o usuário veio do fluxo "Cadastrar meu abrigo", redireciona para o
+  // onboarding do abrigo. Caso contrário, manda para a home.
+  const store = await cookies();
+  const intent = store.get("signup_intent")?.value;
+  if (intent === "shelter") {
+    store.delete("signup_intent");
+    redirect("/onboarding/shelter");
   }
 
   redirect("/");
