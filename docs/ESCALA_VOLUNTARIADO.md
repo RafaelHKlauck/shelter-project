@@ -72,14 +72,36 @@ pnpm test      # Vitest — unitários + integração (concorrência, realtime, 
 
 Os testes de integração precisam do Supabase local no ar e do seed carregado; sem ele são pulados.
 
-## Publicar no projeto do Supabase (produção)
+## Ambiente publicado (produção)
 
-As migrations ainda **não** foram aplicadas no projeto remoto. Quando for a hora:
+As migrations 0014–0017 já estão aplicadas no projeto do Supabase. A massa de testes da escala
+foi carregada com `supabase/seed_prod_escala.sql`, que complementa os usuários de demonstração do
+Grau B. **Senha de todos: `adota123`.**
+
+| Usuário | E-mail | Situação na escala |
+| --- | --- | --- |
+| Carla Ferreira | admin@esperanca.test | Administradora do Abrigo Esperança (coordenadora) |
+| Rafael Lima | admin@refugio.test | Administrador do Refúgio Animal (coordenador) |
+| Maria Silva | voluntaria@adotapet.test | Voluntária no Refúgio Animal e no Abrigo Esperança |
+| Jorge Menezes | jorge@adotapet.test | Voluntário no Abrigo Esperança |
+| Lucas Pereira | lucas@adotapet.test | Voluntário no Abrigo Esperança (disputa por vaga e fila) |
+| João Santos | joao@adotapet.test | Candidatura de voluntariado pendente no Abrigo Esperança |
+
+Turnos (Tabela 12), no sábado seguinte à execução do script:
+
+| Turno | Título | Abrigo | Horário | Vagas |
+| --- | --- | --- | --- | --- |
+| T1 | Passeio com os cães | Abrigo Esperança | 9h às 12h | 3 |
+| T2 | Limpeza dos canis | Abrigo Esperança | 13h às 16h | 1 |
+| T3 | Feira de adoção | Refúgio Animal | 10h às 14h | 5 |
+| T4 | Banho e escovação | Abrigo Esperança | 12h às 13h | 2 |
+
+Para recriar os turnos em outra semana (ou conferir o estado):
 
 ```bash
-supabase db push        # aplica 0014–0017 no projeto linkado
-pnpm db:types           # (com o banco local atualizado) regenera lib/supabase/types.ts
+supabase db query --linked -f supabase/seed_prod_escala.sql
+supabase db query --linked -o table -f supabase/seed_prod_escala_check.sql
 ```
 
-`pg_cron` precisa estar habilitado no projeto (Database → Extensions). O `seed.sql` é só para o
-ambiente local/de testes.
+O script não duplica usuários, vínculos nem turnos. O `seed.sql` (senha `Adotapet@2026`) é só para
+o banco local e não deve ser rodado em produção.
