@@ -4,6 +4,7 @@ import { requireProfile } from "@/lib/auth/server";
 import { createClient } from "@/lib/supabase/server";
 import { LocationWarning } from "@/components/ui/LocationWarning";
 import { SPECIES_LABEL } from "@/lib/format/animals";
+import { VolunteerHoursSection } from "./VolunteerHoursSection";
 
 const FALLBACK_AVATAR =
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400";
@@ -17,8 +18,13 @@ function calcAge(birth: string): number {
   return age;
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
   const { user, profile } = await requireProfile();
+  const { from, to } = await searchParams;
   const supabase = await createClient();
 
   const [{ data: adoptions }, { data: volunteerings }] = await Promise.all([
@@ -41,6 +47,9 @@ export default async function ProfilePage() {
   ]);
 
   const isVolunteer = (volunteerings ?? []).some((v) => v.role === "volunteer");
+  const volunteerShelters = (volunteerings ?? []).flatMap((v) =>
+    v.role === "volunteer" && v.shelter ? [{ id: v.shelter.id, name: v.shelter.name }] : [],
+  );
   const housingLabel = profile.housing_type === "house" ? "Casa" : "Apartamento";
 
   return (
@@ -207,6 +216,9 @@ export default async function ProfilePage() {
             })}
           </div>
         </div>
+      )}
+      {isVolunteer && (
+        <VolunteerHoursSection userId={user.id} shelters={volunteerShelters} from={from} to={to} />
       )}
     </div>
   );

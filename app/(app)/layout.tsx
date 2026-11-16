@@ -10,20 +10,25 @@ export default async function AppLayout({
 }) {
   const user = await getUser();
   let isShelterMember = false;
+  let isVolunteer = false;
 
   if (user) {
     const supabase = await createClient();
     const { data } = await supabase
       .from("shelter_members")
-      .select("shelter_id")
-      .eq("user_id", user.id)
-      .limit(1);
+      .select("shelter_id, role")
+      .eq("user_id", user.id);
     isShelterMember = (data ?? []).length > 0;
+    isVolunteer = (data ?? []).some((m) => m.role === "volunteer");
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header isLoggedIn={Boolean(user)} isShelterMember={isShelterMember} />
+      <Header
+        userId={user?.id ?? null}
+        isShelterMember={isShelterMember}
+        isVolunteer={isVolunteer}
+      />
       <main className="flex-1 bg-gray-50">{children}</main>
       <Footer />
     </div>

@@ -7,9 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   public: {
     Tables: {
       animal_media: {
@@ -451,7 +448,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
-          location: unknown
+          location?: unknown
           name: string
           needs_supplies?: boolean
           phone: string
@@ -477,6 +474,118 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      shift_attendance_log: {
+        Row: {
+          checked_in_at: string | null
+          checked_out_at: string | null
+          enrollment_id: string
+          id: string
+          marked_at: string
+          marked_by: string
+          new_status: Database["public"]["Enums"]["enrollment_status"]
+          previous_status:
+            | Database["public"]["Enums"]["enrollment_status"]
+            | null
+          worked_minutes: number
+        }
+        Insert: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          enrollment_id: string
+          id?: string
+          marked_at?: string
+          marked_by: string
+          new_status: Database["public"]["Enums"]["enrollment_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["enrollment_status"]
+            | null
+          worked_minutes: number
+        }
+        Update: {
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          enrollment_id?: string
+          id?: string
+          marked_at?: string
+          marked_by?: string
+          new_status?: Database["public"]["Enums"]["enrollment_status"]
+          previous_status?:
+            | Database["public"]["Enums"]["enrollment_status"]
+            | null
+          worked_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_attendance_log_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "shift_enrollments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_enrollments: {
+        Row: {
+          attendance_marked_at: string | null
+          attendance_marked_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          checked_in_at: string | null
+          checked_out_at: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          reminder_sent_at: string | null
+          shift_id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+          waitlist_position: number | null
+          worked_minutes: number
+        }
+        Insert: {
+          attendance_marked_at?: string | null
+          attendance_marked_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          reminder_sent_at?: string | null
+          shift_id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+          waitlist_position?: number | null
+          worked_minutes?: number
+        }
+        Update: {
+          attendance_marked_at?: string | null
+          attendance_marked_by?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
+          checked_in_at?: string | null
+          checked_out_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          id?: string
+          reminder_sent_at?: string | null
+          shift_id?: string
+          status?: Database["public"]["Enums"]["enrollment_status"]
+          user_id?: string
+          waitlist_position?: number | null
+          worked_minutes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_enrollments_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_shifts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       supply_needs: {
         Row: {
@@ -525,9 +634,212 @@ export type Database = {
           },
         ]
       }
+      volunteer_blocks: {
+        Row: {
+          blocked_until: string
+          created_at: string
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          reason: string
+          shelter_id: string
+          user_id: string
+        }
+        Insert: {
+          blocked_until: string
+          created_at?: string
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          reason: string
+          shelter_id: string
+          user_id: string
+        }
+        Update: {
+          blocked_until?: string
+          created_at?: string
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          reason?: string
+          shelter_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_blocks_shelter_id_fkey"
+            columns: ["shelter_id"]
+            isOneToOne: false
+            referencedRelation: "shelters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_certificates: {
+        Row: {
+          code: string
+          cpf_masked: string | null
+          file_path: string | null
+          id: string
+          issued_at: string
+          period_end: string
+          period_start: string
+          shelter_id: string
+          shelter_name: string
+          shifts_count: number
+          total_minutes: number
+          user_id: string
+          volunteer_name: string
+        }
+        Insert: {
+          code: string
+          cpf_masked?: string | null
+          file_path?: string | null
+          id?: string
+          issued_at?: string
+          period_end: string
+          period_start: string
+          shelter_id: string
+          shelter_name: string
+          shifts_count: number
+          total_minutes: number
+          user_id: string
+          volunteer_name: string
+        }
+        Update: {
+          code?: string
+          cpf_masked?: string | null
+          file_path?: string | null
+          id?: string
+          issued_at?: string
+          period_end?: string
+          period_start?: string
+          shelter_id?: string
+          shelter_name?: string
+          shifts_count?: number
+          total_minutes?: number
+          user_id?: string
+          volunteer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_certificates_shelter_id_fkey"
+            columns: ["shelter_id"]
+            isOneToOne: false
+            referencedRelation: "shelters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_shifts: {
+        Row: {
+          cancelled_at: string | null
+          capacity: number
+          confirmed_count: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          recurrence_group_id: string | null
+          shelter_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["shift_status"]
+          task_type: Database["public"]["Enums"]["shift_task"]
+          title: string
+          updated_at: string
+          waitlist_count: number
+        }
+        Insert: {
+          cancelled_at?: string | null
+          capacity: number
+          confirmed_count?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          id?: string
+          recurrence_group_id?: string | null
+          shelter_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["shift_status"]
+          task_type?: Database["public"]["Enums"]["shift_task"]
+          title: string
+          updated_at?: string
+          waitlist_count?: number
+        }
+        Update: {
+          cancelled_at?: string | null
+          capacity?: number
+          confirmed_count?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          id?: string
+          recurrence_group_id?: string | null
+          shelter_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["shift_status"]
+          task_type?: Database["public"]["Enums"]["shift_task"]
+          title?: string
+          updated_at?: string
+          waitlist_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_shifts_shelter_id_fkey"
+            columns: ["shelter_id"]
+            isOneToOne: false
+            referencedRelation: "shelters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
-    Views: { [_ in never]: never }
+    Views: {
+      [_ in never]: never
+    }
     Functions: {
+      _vs_fail: {
+        Args: { p_hint?: string; p_message: string }
+        Returns: undefined
+      }
+      _vs_fmt: { Args: { p_ts: string }; Returns: string }
+      _vs_new_certificate_code: { Args: never; Returns: string }
+      _vs_notify: {
+        Args: {
+          p_extra?: Json
+          p_kind: string
+          p_shift: Database["public"]["Tables"]["volunteer_shifts"]["Row"]
+          p_user: string
+        }
+        Returns: undefined
+      }
+      _vs_refresh_shift: { Args: { p_shift_id: string }; Returns: undefined }
+      _vs_validate_shift: {
+        Args: { p_capacity: number; p_ends_at: string; p_starts_at: string }
+        Returns: undefined
+      }
+      active_volunteer_block: {
+        Args: { p_shelter: string; p_user: string }
+        Returns: {
+          blocked_until: string
+          created_at: string
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          reason: string
+          shelter_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "volunteer_blocks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       animals_feed: {
         Args: {
           p_max_km?: number
@@ -549,6 +861,64 @@ export type Database = {
           species: Database["public"]["Enums"]["animal_species"]
         }[]
       }
+      attach_certificate_file: {
+        Args: { p_certificate_id: string; p_file_path: string }
+        Returns: undefined
+      }
+      cancel_enrollment: { Args: { p_enrollment_id: string }; Returns: Json }
+      cancel_shift: {
+        Args: { p_shift_id: string; p_whole_series?: boolean }
+        Returns: number
+      }
+      complete_finished_shifts: { Args: never; Returns: number }
+      compute_worked_minutes: {
+        Args: {
+          p_checked_in_at: string
+          p_checked_out_at: string
+          p_ends_at: string
+          p_starts_at: string
+          p_status: Database["public"]["Enums"]["enrollment_status"]
+        }
+        Returns: number
+      }
+      create_shift: {
+        Args: {
+          p_capacity: number
+          p_description: string
+          p_ends_at: string
+          p_repeat_weeks?: number
+          p_shelter_id: string
+          p_starts_at: string
+          p_task_type: Database["public"]["Enums"]["shift_task"]
+          p_title: string
+        }
+        Returns: {
+          cancelled_at: string | null
+          capacity: number
+          confirmed_count: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          recurrence_group_id: string | null
+          shelter_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["shift_status"]
+          task_type: Database["public"]["Enums"]["shift_task"]
+          title: string
+          updated_at: string
+          waitlist_count: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "volunteer_shifts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      delete_shift: { Args: { p_shift_id: string }; Returns: undefined }
+      enroll_in_shift: { Args: { p_shift_id: string }; Returns: Json }
       f_distance_km: { Args: { a: unknown; b: unknown }; Returns: number }
       get_requester_history: {
         Args: { p_exclude_shelter_id?: string; p_requester_id: string }
@@ -572,9 +942,99 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_shelter_coordinator: {
+        Args: { p_shelter: string; p_user: string }
+        Returns: boolean
+      }
+      is_teammate: {
+        Args: { p_user_a: string; p_user_b: string }
+        Returns: boolean
+      }
+      issue_certificate: {
+        Args: { p_from: string; p_shelter_id: string; p_to: string }
+        Returns: {
+          code: string
+          cpf_masked: string | null
+          file_path: string | null
+          id: string
+          issued_at: string
+          period_end: string
+          period_start: string
+          shelter_id: string
+          shelter_name: string
+          shifts_count: number
+          total_minutes: number
+          user_id: string
+          volunteer_name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "volunteer_certificates"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      lift_volunteer_block: {
+        Args: { p_block_id: string }
+        Returns: {
+          blocked_until: string
+          created_at: string
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          reason: string
+          shelter_id: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "volunteer_blocks"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      mark_attendance: {
+        Args: {
+          p_checked_in_at?: string
+          p_checked_out_at?: string
+          p_enrollment_id: string
+          p_status: Database["public"]["Enums"]["enrollment_status"]
+        }
+        Returns: {
+          attendance_marked_at: string | null
+          attendance_marked_by: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
+          checked_in_at: string | null
+          checked_out_at: string | null
+          created_at: string
+          enrolled_at: string
+          id: string
+          reminder_sent_at: string | null
+          shift_id: string
+          status: Database["public"]["Enums"]["enrollment_status"]
+          user_id: string
+          waitlist_position: number | null
+          worked_minutes: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "shift_enrollments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      mask_cpf: { Args: { p_cpf: string }; Returns: string }
+      promote_waitlist: { Args: { p_shift_id: string }; Returns: number }
+      release_enrollment: { Args: { p_enrollment_id: string }; Returns: Json }
+      send_shift_reminders: { Args: never; Returns: number }
       shelter_has_request_from: {
         Args: { p_shelter: string; p_user: string }
         Returns: boolean
+      }
+      shelter_schedule_indicators: {
+        Args: { p_shelter_id: string }
+        Returns: Json
       }
       shelters_feed: {
         Args: { p_max_km?: number; p_search?: string }
@@ -592,11 +1052,76 @@ export type Database = {
         Args: { p_conv: string; p_role: string }
         Returns: number
       }
+      update_shift: {
+        Args: {
+          p_capacity: number
+          p_description: string
+          p_ends_at: string
+          p_shift_id: string
+          p_starts_at: string
+          p_task_type: Database["public"]["Enums"]["shift_task"]
+          p_title: string
+        }
+        Returns: {
+          cancelled_at: string | null
+          capacity: number
+          confirmed_count: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          id: string
+          recurrence_group_id: string | null
+          shelter_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["shift_status"]
+          task_type: Database["public"]["Enums"]["shift_task"]
+          title: string
+          updated_at: string
+          waitlist_count: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "volunteer_shifts"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      verify_certificate: {
+        Args: { p_code: string }
+        Returns: {
+          code: string
+          cpf_masked: string
+          issued_at: string
+          period_end: string
+          period_start: string
+          shelter_name: string
+          shifts_count: number
+          total_minutes: number
+          volunteer_name: string
+        }[]
+      }
+      volunteer_hours_summary: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          shelter_id: string
+          shelter_name: string
+          shifts_count: number
+          total_minutes: number
+        }[]
+      }
     }
     Enums: {
       animal_size: "small" | "medium" | "large"
       animal_species: "dog" | "cat" | "other"
       animal_status: "available" | "reserved" | "adopted" | "unavailable"
+      enrollment_status:
+        | "confirmed"
+        | "waitlisted"
+        | "cancelled"
+        | "attended"
+        | "absent"
+        | "excused"
       housing_type: "house" | "apartment"
       request_kind: "adoption" | "volunteer" | "supply"
       request_status:
@@ -606,9 +1131,163 @@ export type Database = {
         | "finalized"
         | "cancelled"
       shelter_role: "admin" | "editor" | "volunteer"
+      shift_status: "scheduled" | "cancelled" | "completed"
+      shift_task: "walk" | "cleaning" | "care" | "event" | "other"
       supply_status: "open" | "in_progress" | "fulfilled" | "cancelled"
       user_role: "user" | "shelter_team"
     }
-    CompositeTypes: { [_ in never]: never }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      animal_size: ["small", "medium", "large"],
+      animal_species: ["dog", "cat", "other"],
+      animal_status: ["available", "reserved", "adopted", "unavailable"],
+      enrollment_status: [
+        "confirmed",
+        "waitlisted",
+        "cancelled",
+        "attended",
+        "absent",
+        "excused",
+      ],
+      housing_type: ["house", "apartment"],
+      request_kind: ["adoption", "volunteer", "supply"],
+      request_status: [
+        "pending",
+        "accepted",
+        "rejected",
+        "finalized",
+        "cancelled",
+      ],
+      shelter_role: ["admin", "editor", "volunteer"],
+      shift_status: ["scheduled", "cancelled", "completed"],
+      shift_task: ["walk", "cleaning", "care", "event", "other"],
+      supply_status: ["open", "in_progress", "fulfilled", "cancelled"],
+      user_role: ["user", "shelter_team"],
+    },
+  },
+} as const
+
