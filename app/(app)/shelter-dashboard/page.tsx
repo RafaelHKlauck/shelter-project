@@ -10,6 +10,7 @@ import { AnimalsTab } from "./AnimalsTab";
 import { InfoForm } from "./InfoForm";
 import { SuppliesEditor } from "./SuppliesEditor";
 import { TeamTab, type Member } from "./TeamTab";
+import { ScheduleTab } from "./schedule/ScheduleTab";
 
 export default async function ShelterDashboardPage({
   searchParams,
@@ -155,6 +156,11 @@ export default async function ShelterDashboardPage({
     (m) => m.user_id === user.id && m.role === "admin",
   );
 
+  // coordenador = admin ou editor (a aba Escala não aparece para voluntários — CT01_07)
+  const isCoordinator = (teamRows ?? []).some(
+    (m) => m.user_id === user.id && (m.role === "admin" || m.role === "editor"),
+  );
+
   const members: Member[] = (teamRows ?? []).map((m) => {
     const p = teamProfilesMap.get(m.user_id);
     return {
@@ -174,7 +180,7 @@ export default async function ShelterDashboardPage({
             Painel do Abrigo: {shelter.name}
           </h1>
           <p className="text-gray-600">
-            Gerencie solicitações, animais e informações do abrigo
+            Gerencie solicitações, animais, escala de voluntários e informações do abrigo
           </p>
         </div>
         <ShelterSwitcher current={selected.id} shelters={list} />
@@ -203,6 +209,7 @@ export default async function ShelterDashboardPage({
           />
         }
         animals={<AnimalsTab animals={animals ?? []} />}
+        schedule={isCoordinator ? <ScheduleTab shelterId={shelter.id} /> : undefined}
         team={
           <TeamTab
             shelterId={shelter.id}
