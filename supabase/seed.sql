@@ -2,7 +2,7 @@
 -- Uso: `supabase db reset` aplica as migrations e este seed no banco LOCAL.
 -- NÃO rode em produção.
 --
--- Todos os usuários usam a mesma senha de teste: Adotapet@2026
+-- Todos os usuários usam a mesma senha de teste: adota123
 
 -- ============ Usuários (Tabela 11) ============
 do $$
@@ -25,7 +25,7 @@ begin
       confirmation_token, email_change, email_change_token_new, recovery_token
     ) values (
       '00000000-0000-0000-0000-000000000000', u.id, 'authenticated', 'authenticated', u.email,
-      extensions.crypt('Adotapet@2026', extensions.gen_salt('bf')), now(),
+      extensions.crypt('adota123', extensions.gen_salt('bf')), now(),
       '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', ''
     );
     insert into auth.identities (

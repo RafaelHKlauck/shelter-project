@@ -14,7 +14,7 @@ import type { Database } from "@/lib/supabase/types";
 const URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54321";
 // chave publicável padrão do `supabase start` (só serve para o ambiente local)
 const KEY = process.env.SUPABASE_TEST_PUBLISHABLE_KEY ?? "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
-const PASSWORD = "Adotapet@2026"; // senha de teste do supabase/seed.sql
+const PASSWORD = "adota123"; // senha de teste do supabase/seed.sql
 const ESPERANCA = "aaaaaaaa-0000-0000-0000-000000000001";
 
 type Client = SupabaseClient<Database>;
@@ -41,7 +41,35 @@ describe.skipIf(!reachable)("Escala de voluntariado — integração", () => {
       login("lucas@adotapet.test"),
       login("voluntaria@adotapet.test"),
     ]);
-  });
+    await warmUpRealtime();
+  }, 60_000);
+
+  // Logo depois de um `supabase db reset` o Realtime local leva alguns segundos para voltar
+  // a entregar eventos. Espera o primeiro evento chegar antes de medir a latência (CT03_02).
+  async function warmUpRealtime() {
+    const shiftId = await newShift(20, 20, "Aquecimento do Realtime");
+    let got = false;
+    const ch = maria
+      .channel(`warmup-${shiftId}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "volunteer_shifts", filter: `id=eq.${shiftId}` }, () => {
+        got = true;
+      })
+      .subscribe();
+    const deadline = Date.now() + 45_000;
+    let enrollment: string | null = null;
+    while (!got && Date.now() < deadline) {
+      if (enrollment) {
+        await jorge.rpc("cancel_enrollment", { p_enrollment_id: enrollment });
+        enrollment = null;
+      } else {
+        const { data } = await jorge.rpc("enroll_in_shift", { p_shift_id: shiftId });
+        enrollment = (data as { enrollment_id: string } | null)?.enrollment_id ?? null;
+      }
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    if (enrollment) await jorge.rpc("cancel_enrollment", { p_enrollment_id: enrollment });
+    await maria.removeChannel(ch);
+  }
 
   afterAll(async () => {
     // cancela os turnos criados (as inscrições viram cancelled e não geram conflito na próxima execução)
@@ -97,9 +125,11 @@ describe.skipIf(!reachable)("Escala de voluntariado — integração", () => {
 
   it("CT03_02 — inscrição em uma sessão atualiza as vagas na outra em até 3 segundos", async () => {
     const shiftId = await newShift(12, 3, "CT03_02 Realtime");
+    // mede do momento da inscrição até o evento chegar (RNF14); a assinatura do canal
+    // pode demorar mais logo depois de um reset do banco, que reinicia o Realtime
     const received = new Promise<number>((resolve, reject) => {
-      const t0 = Date.now();
-      const timeout = setTimeout(() => reject(new Error("sem evento em 3s")), 3000);
+      let t0 = 0;
+      const timeout = setTimeout(() => reject(new Error("sem evento")), 15_000);
       const ch = maria
         .channel(`test-${shiftId}`)
         .on(
@@ -107,7 +137,7 @@ describe.skipIf(!reachable)("Escala de voluntariado — integração", () => {
           { event: "UPDATE", schema: "public", table: "volunteer_shifts", filter: `id=eq.${shiftId}` },
           (payload) => {
             const row = payload.new as { confirmed_count: number };
-            if (row.confirmed_count === 1) {
+            if (row.confirmed_count === 1 && t0) {
               clearTimeout(timeout);
               maria.removeChannel(ch);
               resolve(Date.now() - t0);
@@ -116,6 +146,8 @@ describe.skipIf(!reachable)("Escala de voluntariado — integração", () => {
         )
         .subscribe(async (status) => {
           if (status === "SUBSCRIBED") {
+            await new Promise((r) => setTimeout(r, 500));
+            t0 = Date.now();
             await jorge.rpc("enroll_in_shift", { p_shift_id: shiftId });
           }
         });

@@ -16,6 +16,8 @@ type Row = {
   created_at: string;
 };
 
+const SELF_ACTION_KINDS = new Set(["shift.enrolled", "shift.waitlisted"]);
+
 function ago(iso: string) {
   const diff = Math.max(0, Date.now() - new Date(iso).getTime());
   const min = Math.floor(diff / 60000);
@@ -55,7 +57,8 @@ export function NotificationBell({ userId }: { userId: string }) {
         (payload) => {
           const row = payload.new as Row;
           setItems((prev) => [row, ...prev.filter((p) => p.id !== row.id)].slice(0, 20));
-          toast(describeNotification(row.kind, row.payload).title);
+          // a própria tela já confirma as ações da pessoa; o aviso flutuante fica para o que vem de fora
+          if (!SELF_ACTION_KINDS.has(row.kind)) toast(describeNotification(row.kind, row.payload).title);
         },
       );
     ensureRealtimeAuth(supabase).then(() => {

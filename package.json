@@ -8,8 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:db": "supabase test db",
-    "db:types": "supabase gen types typescript --local --schema public > lib/supabase/types.ts"
+    "test:db": "supabase db reset && supabase test db",
+    "db:types": "supabase gen types typescript --local --schema public > lib/supabase/types.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:prod": "E2E_TARGET=prod playwright test",
+    "e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
@@ -36,6 +39,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

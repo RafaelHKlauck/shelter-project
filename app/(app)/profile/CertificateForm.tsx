@@ -42,7 +42,7 @@ export function CertificateForm({ shelters }: { shelters: { id: string; name: st
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm">
           <span className="block text-gray-700 mb-1">Abrigo</span>
-          <select value={shelterId} onChange={(e) => setShelterId(e.target.value)} className={input}>
+          <select aria-label="Certificado: abrigo" value={shelterId} onChange={(e) => setShelterId(e.target.value)} className={input}>
             {shelters.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -52,11 +52,11 @@ export function CertificateForm({ shelters }: { shelters: { id: string; name: st
         </label>
         <label className="text-sm">
           <span className="block text-gray-700 mb-1">De</span>
-          <input type="date" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className={input} />
+          <input type="date" aria-label="Certificado: data inicial" value={from} max={to} onChange={(e) => setFrom(e.target.value)} className={input} />
         </label>
         <label className="text-sm">
           <span className="block text-gray-700 mb-1">Até</span>
-          <input type="date" value={to} min={from} onChange={(e) => setTo(e.target.value)} className={input} />
+          <input type="date" aria-label="Certificado: data final" value={to} min={from} onChange={(e) => setTo(e.target.value)} className={input} />
         </label>
         <button
           type="button"

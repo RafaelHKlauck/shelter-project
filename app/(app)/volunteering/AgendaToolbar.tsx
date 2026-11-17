@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { moveAgenda, todayLocal, type AgendaView } from "@/lib/volunteering/time";
@@ -23,12 +24,20 @@ export function AgendaToolbar({
   const router = useRouter();
   const params = useSearchParams();
 
+  // guarda a última URL pedida: dois filtros trocados em sequência não podem
+  // partir dos parâmetros antigos enquanto a navegação anterior ainda não terminou
+  const latest = useRef(params.toString());
+  useEffect(() => {
+    latest.current = params.toString();
+  }, [params]);
+
   const go = (patch: Record<string, string | null>) => {
-    const next = new URLSearchParams(params.toString());
+    const next = new URLSearchParams(latest.current);
     for (const [k, v] of Object.entries(patch)) {
       if (v) next.set(k, v);
       else next.delete(k);
     }
+    latest.current = next.toString();
     router.push(`/volunteering?${next.toString()}`, { scroll: false });
   };
 
@@ -75,6 +84,7 @@ export function AgendaToolbar({
         <label className="block">
           <span className="block text-sm font-medium text-gray-700 mb-1">Abrigo</span>
           <select
+            aria-label="Abrigo"
             value={shelter ?? ""}
             onChange={(e) => go({ shelter: e.target.value || null })}
             className="w-full min-h-11 rounded-xl border border-gray-300 bg-white px-3 text-base"
@@ -90,6 +100,7 @@ export function AgendaToolbar({
         <label className="block">
           <span className="block text-sm font-medium text-gray-700 mb-1">Tipo de tarefa</span>
           <select
+            aria-label="Tipo de tarefa"
             value={task ?? ""}
             onChange={(e) => go({ task: e.target.value || null })}
             className="w-full min-h-11 rounded-xl border border-gray-300 bg-white px-3 text-base"

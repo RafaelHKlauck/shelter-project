@@ -59,18 +59,27 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 pnpm dev
 ```
 
-Usuários de teste (senha `Adotapet@2026`, definida em `supabase/seed.sql`):
+Usuários de teste (senha `adota123`, definida em `supabase/seed.sql`):
 `admin@esperanca.test` (Carla), `admin@refugio.test` (Rafael), `voluntaria@adotapet.test` (Maria),
 `jorge@adotapet.test`, `lucas@adotapet.test`, `joao@adotapet.test` (candidatura pendente).
 
 ## Testes
 
 ```bash
-pnpm test:db   # pgTAP — 159 asserções cobrindo os casos de teste CT01–CT14 e CTR
-pnpm test      # Vitest — unitários + integração (concorrência, realtime, RLS pela API)
+pnpm test:db          # pgTAP — reseta o banco local e roda 159 asserções (CT01–CT14, CTR)
+pnpm test             # Vitest — unitários + integração (concorrência, realtime, RLS pela API)
+pnpm test:e2e         # Playwright — 28 casos de ponta a ponta no app local (build + banco resetado)
+pnpm e2e:report       # abre o relatório HTML do Playwright (playwright-report/index.html)
+pnpm test:e2e:prod    # os mesmos casos contra https://shelter-project-seven.vercel.app
 ```
 
-Os testes de integração precisam do Supabase local no ar e do seed carregado; sem ele são pulados.
+- Os testes de integração e E2E precisam do Supabase local no ar (`supabase start`).
+- O E2E reseta o banco local antes de rodar (`E2E_SKIP_RESET=1` desliga isso).
+- Contra produção, os turnos criados pelos testes são cancelados ao final, e o caso CTR_01
+  (que aprovaria de forma permanente a candidatura do João) é pulado. O helper respeita o limite de
+  logins do Supabase Auth (30 a cada 5 minutos), então a execução em produção pode pausar.
+- No local, `supabase/config.toml` amplia esse limite (`sign_in_sign_ups = 300`) para a suíte rodar
+  sem pausas.
 
 ## Ambiente publicado (produção)
 
@@ -103,5 +112,5 @@ supabase db query --linked -f supabase/seed_prod_escala.sql
 supabase db query --linked -o table -f supabase/seed_prod_escala_check.sql
 ```
 
-O script não duplica usuários, vínculos nem turnos. O `seed.sql` (senha `Adotapet@2026`) é só para
+O script não duplica usuários, vínculos nem turnos. O `seed.sql` (senha `adota123`) é só para
 o banco local e não deve ser rodado em produção.
